@@ -17,61 +17,63 @@
           <div class="da-list-header">
             <div class="da-header-left">
               <div class="da-header-item">
-                <div class="da-header-item-label">Tên người khai thác:</div>
-                <d-search
-                  [size]="'sm'"
-                  (searchFn)="getList()"
-                  [(ngModel)]="_search.staff_name"
-                  class="da-inline"
-                  [placeholder]="'Tên người khai thác'"
-                ></d-search>
-              </div>
-              <div class="da-header-item">
-                <div class="da-header-item-label">Mục đích khai thác:</div>
-                <d-search
-                  [size]="'sm'"
-                  (searchFn)="getList()"
-                  [(ngModel)]="_search.mining_purpose"
-                  class="da-inline"
-                  [placeholder]="'Mục đích khai thác'"
-                ></d-search>
-              </div>
-              <div class="da-header-item">
-                <div class="da-header-item-label">Trạng thái:</div>
+                <div class="da-header-item-label">Danh mục lớn:</div>
                 <d-select
-                  [options]="miningFileStatusOptions"
-                  [(ngModel)]="miningFileStatus"
+                  [options]="categoryOptions"
+                  [(ngModel)]="categoryChosen"
+                  [filterKey]="'category_name'"
+                  (valueChange)="subcategoryChosen = []; getList()"
+                  [placeholder]="'Danh mục lớn'"
+                  >
+                </d-select>
+              </div>
+              <div class="da-header-item" *ngIf="categoryChosen">
+                <div class="da-header-item-label">Danh mục nhỏ:</div>
+                <d-select
+                  [options]="categoryChosen.subcategories"
+                  [(ngModel)]="subcategoryChosen"
+                  [multiple]="true"
+                  [disabled]="categoryChosen.subcategories.length == 0"
+                  [filterKey]="'subcategory_name'"
                   (valueChange)="getList()"
-                  [placeholder]="'Trạng thái'"
+                  [placeholder]="'Danh mục nhỏ'"
                   >
                 </d-select>
               </div>
               <div class="da-header-item">
-                <div class="da-header-item-label">Ngày khai thác:</div>
+                <div class="da-header-item-label">Tên sản phẩm:</div>
+                <d-search
+                  [size]="'sm'"
+                  (searchFn)="getList()"
+                  [(ngModel)]="_search.text_search"
+                  class="da-inline"
+                  [placeholder]="'Tên sản phẩm'"
+                ></d-search>
+              </div>
+              <div class="da-header-item">
+                <div class="da-header-item-label">Sắp xếp theo:</div>
+                <d-select
+                  [options]="sortOptions"
+                  [filterKey]="'label'"
+                  [(ngModel)]="sortChosen"
+                  (valueChange)="getList()"
+                  [placeholder]="'Sắp xếp'"
+                  >
+                </d-select>
+              </div>
+              <div class="da-header-item">
+                <div class="da-header-item-label">Giá sản phẩm:</div>
                 <section style="display: flex;">
                   <div class="col-md-6" style="margin-right: 10px">
                     <div class="row">
                       <div class="col-md-6">
-                        <div class="devui-input-group devui-dropdown-origin">
-                          <input
-                            class="devui-input devui-form-control"
-                            placeholder="Từ ngày"
-                            name="dp"
-                            [(ngModel)]="_search.borrowed_date"
-                            (click)="datePicker1.toggle()"
-                            autocomplete="off"
-                            dDatepicker
-                            appendToBody
-                            #datePicker1="datepicker"
-                            (selectedDateChange)="getList()"
-                          />
-                          <div *ngIf="_search.borrowed_date" class="devui-input-group-addon close-icon-wrapper" (click)="datePicker1.clearAll()">
-                            <i class="icon icon-close"></i>
-                          </div>
-                          <div class="devui-input-group-addon" (click)="datePicker1.toggle()">
-                            <i class="icon icon-calendar"></i>
-                          </div>
-                        </div>
+                        <d-search
+                          [size]="'sm'"
+                          (searchFn)="getList()"
+                          [(ngModel)]="_search.min_price"
+                          class="da-inline"
+                          [placeholder]="'Giá từ'"
+                        ></d-search>
                       </div>
                     </div>
                   </div>
@@ -79,26 +81,13 @@
                   <div class="col-md-6">
                     <div class="row">
                       <div class="col-md-6">
-                        <div class="devui-input-group devui-dropdown-origin">
-                          <input
-                            class="devui-input devui-form-control"
-                            placeholder="Đến ngày"
-                            name="dp"
-                            [(ngModel)]="_search.return_date"
-                            (click)="datePicker2.toggle()"
-                            autocomplete="off"
-                            dDatepicker
-                            appendToBody
-                            #datePicker2="datepicker"
-                            (selectedDateChange)="getList()"
-                          />
-                          <div *ngIf="_search.return_date" class="devui-input-group-addon close-icon-wrapper" (click)="datePicker2.clearAll()">
-                            <i class="icon icon-close"></i>
-                          </div>
-                          <div class="devui-input-group-addon" (click)="datePicker2.toggle()">
-                            <i class="icon icon-calendar"></i>
-                          </div>
-                        </div>
+                        <d-search
+                          [size]="'sm'"
+                          (searchFn)="getList()"
+                          [(ngModel)]="_search.max_price"
+                          class="da-inline"
+                          [placeholder]="'Đến giá'"
+                        ></d-search>
                       </div>
                     </div>
                   </div>
@@ -106,7 +95,9 @@
               </div>
             </div>
             <div class="header-right">
-              <d-button (click)="reset()">Reset</d-button>
+              <d-button (click)="addRow()" style="margin-right: 8px">Thêm sản phẩm</d-button>
+              <d-button (click)="reset()" bsStyle="common" style="margin-right: 8px">Reset</d-button>
+              <d-button (click)="batchDelete()" bsStyle="danger" [disabled]="!deleteList.length">Xóa hàng loạt</d-button>
             </div>
           </div>
           <br />
@@ -118,77 +109,66 @@
               [size]="searchForm.size"
               [tableLayout]="searchForm.layout"
               [scrollable]="true"
+              (checkAllChange)="onCheckAllChange()"
             >
-              <d-column header="STT" [width]="'100px'">
-                <d-cell>
-                  <ng-template let-rowIndex="rowIndex">
-                    {{ rowIndex + 1 }}
-                  </ng-template>
-                </d-cell>
-              </d-column>
-              <d-column field="mining_file_code" header="Mã phiếu khai thác" [width]="'100px'">
-                <d-cell>
-                  <ng-template let-cellItem="cellItem">
-                    {{ cellItem }}
-                  </ng-template>
-                </d-cell>
-              </d-column>
-              <d-column field="staff_created_name" header="Tên người lập khai thác" [width]="'150px'">
-                <d-cell>
-                  <ng-template let-cellItem="cellItem">
-                    {{ cellItem }}
-                  </ng-template>
-                </d-cell>
-              </d-column>
-              <d-column field="borrowed_date" header="Ngày khai thác" [width]="'100px'">
-                <d-cell>
-                  <ng-template let-cellItem="cellItem">
-                    {{ cellItem | date : 'MM/dd/yyyy' }}
-                  </ng-template>
-                </d-cell>
-              </d-column>
-              <d-column field="return_date" header="Ngày trả" [width]="'100px'">
-                <d-cell>
-                  <ng-template let-cellItem="cellItem">
-                    {{ cellItem | date : 'MM/dd/yyy' }}
-                  </ng-template>
-                </d-cell>
-              </d-column>
-              <d-column field="mining_purpose" header="Mục đích khai thác" [width]="'300px'">
-                <d-cell>
-                  <ng-template let-cellItem="cellItem">
-                    {{ cellItem }}
-                  </ng-template>
-                </d-cell>
-              </d-column>
-              <d-column field="mining_note" header="Ghi chú" [width]="'200px'">
-                <d-cell>
-                  <ng-template let-cellItem="cellItem">
-                    {{ cellItem }}
-                  </ng-template>
-                </d-cell>
-              </d-column>
-              <d-column field="number_of_profile" header="Số hồ sơ" [width]="'100px'">
-                <d-cell>
-                  <ng-template let-cellItem="cellItem">
-                    {{ cellItem }}
-                  </ng-template>
-                </d-cell>
-              </d-column>
-              <d-column field="number_of_document" header="Số văn bản" [width]="'100px'">
-                <d-cell>
-                  <ng-template let-cellItem="cellItem">
-                    {{ cellItem }}
-                  </ng-template>
-                </d-cell>
-              </d-column>
-              <d-column field="status" header="Trạng thái" [width]="'150px'">
-                <d-cell>
-                  <ng-template let-cellItem="cellItem">
-                    {{ cellItem }}
-                  </ng-template>
-                </d-cell>
-              </d-column>
+              <thead dTableHead [checkable]="true">
+                <tr dTableRow>
+                  <th dHeadCell>#</th>
+                  <th dHeadCell>Ảnh</th>
+                  <th dHeadCell>Tên sản phẩm</th>
+                  <th dHeadCell>Phân loại</th>
+                  <th dHeadCell>Giá sản phẩm</th>
+                  <th dHeadCell>Số lượng bán ra</th>
+                  <th dHeadCell>Tác vụ</th>
+                </tr>
+              </thead>
+              <tbody dTableBody>
+                <ng-template let-rowItem="rowItem" let-rowIndex="rowIndex" let-nestedIndex="nestedIndex">
+                  <tr dTableRow [ngClass]="{ 'table-row-selected': rowItem.$checked }">
+                    <td dTableCell class="devui-checkable-cell">
+                      <d-checkbox
+                        (ngModelChange)="onRowCheckChange($event, rowIndex, nestedIndex, rowItem)"
+                        [ngModel]="rowItem.$checked"
+                        [halfchecked]="rowItem.$halfChecked"
+                        [disabled]="rowItem.$checkDisabled"
+                        dTooltip
+                        [content]="rowItem.$checkBoxTips"
+                        [position]="['top', 'right', 'bottom', 'left']"
+                        [showAnimation]="false"
+                      >
+                      </d-checkbox>
+                    </td>
+                    <td dTableCell>{{ rowIndex + 1 }}</td>
+                    <td dTableCell>
+                      <img style="width: 60px; height: 100%; border-radius: 2px" src="{{ image_api }}image/product/{{rowItem.colors[0].product_image1 }}" alt="">
+                    </td>
+                    <td dTableCell>
+                      {{ rowItem.product_name }}
+                    </td>
+                    <td dTableCell>
+                      {{ rowItem.colors.length }} Màu
+                        (<span
+                          *ngFor="let cl of rowItem.colors; index as i"
+                          >
+                          {{ cl.color_name + (i == rowItem.colors.length - 1 ? '' : ',')}}
+                          </span>), {{ rowItem.colors[0].sizes.length }} Size
+                    </td>
+                    <td dTableCell>
+                      <span *ngIf="rowItem.min_price !== rowItem.max_price">{{ rowItem.min_price | number }}đ - {{ rowItem.max_price | number }}đ</span>
+                      <span *ngIf="rowItem.min_price === rowItem.max_price">{{ rowItem.min_price | number }}đ</span>
+                    </td>
+                    <td dTableCell>
+                    {{ rowItem.quantity_sold }}
+                    </td>
+                    <td dTableCell>
+                      <div class="btn-group over-flow-ellipsis">
+                        <d-button icon="icon-edit" bsStyle="danger" bsSize="xs" title="edit" shape="circle" style="margin-right: 8px"></d-button>
+                        <d-button icon="icon-delete" bsStyle="danger" bsSize="xs" title="delete" shape="circle"></d-button>
+                      </div>
+                    </td>
+                  </tr>
+                </ng-template>
+              </tbody>
             </d-data-table>
           </div>
           <div class="da-list-footer">
@@ -211,3 +191,8 @@
     </da-layout-row>
   </div>
 </div>
+
+<ng-template #EditorTemplate>
+  <da-admin-form>
+  </da-admin-form>
+</ng-template>
