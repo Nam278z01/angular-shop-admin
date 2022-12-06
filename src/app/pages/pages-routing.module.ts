@@ -35,6 +35,11 @@ const routes: Routes = [
           import('./user/user.module').then((m) => m.UserModule),
       },
       {
+        path: 'management',
+        loadChildren: () =>
+          import('./management/management.module').then((m) => m.ManagementModule),
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full',

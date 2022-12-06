@@ -72,6 +72,11 @@ export class PagesComponent implements OnInit {
       .get('page')
       .pipe(takeUntil(this.destroy$))
       .subscribe((res) => {
+        res.management = {
+          title: "Quản lý",
+          product: "Sản phẩm",
+          order: "Đơn hàng"
+        }
         this.updateMenu(res);
       });
 

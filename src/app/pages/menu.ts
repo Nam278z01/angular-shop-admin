@@ -76,5 +76,14 @@ export default function (values: any) {
       link: '/pages/user',
       menuIcon: 'icon icon-mine',
     },
+    {
+      title: values['management']['title'],
+      children: [
+        { title: values['management']['product'], link: '/pages/management/product' },
+        { title: values['management']['order'], link: '/pages/management/order' },
+      ],
+      link: '/pages/management',
+      menuIcon: 'icon icon-table',
+    },
   ];
 }

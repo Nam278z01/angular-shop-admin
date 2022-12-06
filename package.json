@@ -9,7 +9,7 @@
   },
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --open --port 8001",
+    "start": "ng serve --open --port 4300",
     "build": "ng build",
     "build:website": "ng build --configuration production --base-href /admin/ --deploy-url /admin/ --output-path dist/admin",
     "test": "ng test",

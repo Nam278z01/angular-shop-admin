@@ -19,13 +19,14 @@
     "lib": ["es2018", "dom"],
     "paths": {
       "@devui": ["node_modules/ng-devui"]
-    }
+    },
+    "strictPropertyInitialization": false,
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictPropertyInitialization": false,
-    "strictTemplates": true
+    "strictTemplates": true,
   }
 }

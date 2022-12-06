@@ -3,8 +3,11 @@ import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthService } from 'src/app/@core/services/auth.service';
 import { LANGUAGES } from 'src/config/language-config';
-import { User } from '../../../models/user';
 import { I18nService } from 'ng-devui/i18n';
+
+import { DataService } from './../../../../@core/services/data.service';
+import { StorageService } from 'src/app/@core/services/storage.service';
+import { AdminModel } from 'src/app/@core/data/adminData';
 
 @Component({
   selector: 'da-header-operation',
@@ -12,24 +15,25 @@ import { I18nService } from 'ng-devui/i18n';
   styleUrls: ['./header-operation.component.scss'],
 })
 export class HeaderOperationComponent implements OnInit {
-  user: User;
+  user: AdminModel;
   languages = LANGUAGES;
   language: string;
   haveLoggedIn = false;
   noticeCount: number;
 
-  constructor(private route: Router, private authService: AuthService, private translate: TranslateService, private i18n: I18nService) {}
+  constructor(private route: Router, private authService: AuthService, private translate: TranslateService, private i18n: I18nService, private _dataService: DataService, private _storageService: StorageService, private router: Router, private _authService: AuthService) {}
 
   ngOnInit(): void {
-    if (localStorage.getItem('userinfo')) {
-      this.user = JSON.parse(localStorage.getItem('userinfo')!);
-      this.haveLoggedIn = true;
-    } else {
-      this.authService.login('Admin', 'Devui.admin').subscribe((res) => {
-        this.authService.setSession(res);
-        this.user = JSON.parse(localStorage.getItem('userinfo')!);
+    this._authService.getCurrentAdmin();
+    if (localStorage.getItem('CURRENT_ADMIN')) {
+      this._dataService.admin$.subscribe((res: any) => {
+        this.user = res;
+        console.log(this.user);
         this.haveLoggedIn = true;
-      });
+      }, (err) => {
+        this._storageService.removeItem('CURRENT_ADMIN')
+        this.router.navigate(['/login'])
+      })
     }
     this.language = this.translate.currentLang;
   }

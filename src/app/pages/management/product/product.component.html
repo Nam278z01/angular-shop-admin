@@ -1,0 +1,213 @@
+<div class="da-list-wrap">
+  <div class="da-content-banner">
+    <d-breadcrumb>
+      <d-breadcrumb-item
+        ><a routerLink="/">{{ 'list.breadcrumb.home' | translate }}</a></d-breadcrumb-item
+      >
+      <d-breadcrumb-item>Quản lý</d-breadcrumb-item>
+      <d-breadcrumb-item>Sản phẩm</d-breadcrumb-item>
+    </d-breadcrumb>
+    <div class="da-content-banner-title">Quản lý</div>
+    <div>Sản phẩm</div>
+  </div>
+  <div class="da-content-wrapper">
+    <da-layout-row [daGutter]="[24, 24]">
+      <da-col-item [daSpan]="24" [daXs]="24">
+        <div class="da-list-container">
+          <div class="da-list-header">
+            <div class="da-header-left">
+              <div class="da-header-item">
+                <div class="da-header-item-label">Tên người khai thác:</div>
+                <d-search
+                  [size]="'sm'"
+                  (searchFn)="getList()"
+                  [(ngModel)]="_search.staff_name"
+                  class="da-inline"
+                  [placeholder]="'Tên người khai thác'"
+                ></d-search>
+              </div>
+              <div class="da-header-item">
+                <div class="da-header-item-label">Mục đích khai thác:</div>
+                <d-search
+                  [size]="'sm'"
+                  (searchFn)="getList()"
+                  [(ngModel)]="_search.mining_purpose"
+                  class="da-inline"
+                  [placeholder]="'Mục đích khai thác'"
+                ></d-search>
+              </div>
+              <div class="da-header-item">
+                <div class="da-header-item-label">Trạng thái:</div>
+                <d-select
+                  [options]="miningFileStatusOptions"
+                  [(ngModel)]="miningFileStatus"
+                  (valueChange)="getList()"
+                  [placeholder]="'Trạng thái'"
+                  >
+                </d-select>
+              </div>
+              <div class="da-header-item">
+                <div class="da-header-item-label">Ngày khai thác:</div>
+                <section style="display: flex;">
+                  <div class="col-md-6" style="margin-right: 10px">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <div class="devui-input-group devui-dropdown-origin">
+                          <input
+                            class="devui-input devui-form-control"
+                            placeholder="Từ ngày"
+                            name="dp"
+                            [(ngModel)]="_search.borrowed_date"
+                            (click)="datePicker1.toggle()"
+                            autocomplete="off"
+                            dDatepicker
+                            appendToBody
+                            #datePicker1="datepicker"
+                            (selectedDateChange)="getList()"
+                          />
+                          <div *ngIf="_search.borrowed_date" class="devui-input-group-addon close-icon-wrapper" (click)="datePicker1.clearAll()">
+                            <i class="icon icon-close"></i>
+                          </div>
+                          <div class="devui-input-group-addon" (click)="datePicker1.toggle()">
+                            <i class="icon icon-calendar"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <div class="devui-input-group devui-dropdown-origin">
+                          <input
+                            class="devui-input devui-form-control"
+                            placeholder="Đến ngày"
+                            name="dp"
+                            [(ngModel)]="_search.return_date"
+                            (click)="datePicker2.toggle()"
+                            autocomplete="off"
+                            dDatepicker
+                            appendToBody
+                            #datePicker2="datepicker"
+                            (selectedDateChange)="getList()"
+                          />
+                          <div *ngIf="_search.return_date" class="devui-input-group-addon close-icon-wrapper" (click)="datePicker2.clearAll()">
+                            <i class="icon icon-close"></i>
+                          </div>
+                          <div class="devui-input-group-addon" (click)="datePicker2.toggle()">
+                            <i class="icon icon-calendar"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+            <div class="header-right">
+              <d-button (click)="reset()">Reset</d-button>
+            </div>
+          </div>
+          <br />
+          <div class="list-content" dLoading [loading]="busy">
+            <d-data-table
+              #datatable
+              [dataSource]="basicDataSource"
+              [borderType]="searchForm.borderType"
+              [size]="searchForm.size"
+              [tableLayout]="searchForm.layout"
+              [scrollable]="true"
+            >
+              <d-column header="STT" [width]="'100px'">
+                <d-cell>
+                  <ng-template let-rowIndex="rowIndex">
+                    {{ rowIndex + 1 }}
+                  </ng-template>
+                </d-cell>
+              </d-column>
+              <d-column field="mining_file_code" header="Mã phiếu khai thác" [width]="'100px'">
+                <d-cell>
+                  <ng-template let-cellItem="cellItem">
+                    {{ cellItem }}
+                  </ng-template>
+                </d-cell>
+              </d-column>
+              <d-column field="staff_created_name" header="Tên người lập khai thác" [width]="'150px'">
+                <d-cell>
+                  <ng-template let-cellItem="cellItem">
+                    {{ cellItem }}
+                  </ng-template>
+                </d-cell>
+              </d-column>
+              <d-column field="borrowed_date" header="Ngày khai thác" [width]="'100px'">
+                <d-cell>
+                  <ng-template let-cellItem="cellItem">
+                    {{ cellItem | date : 'MM/dd/yyyy' }}
+                  </ng-template>
+                </d-cell>
+              </d-column>
+              <d-column field="return_date" header="Ngày trả" [width]="'100px'">
+                <d-cell>
+                  <ng-template let-cellItem="cellItem">
+                    {{ cellItem | date : 'MM/dd/yyy' }}
+                  </ng-template>
+                </d-cell>
+              </d-column>
+              <d-column field="mining_purpose" header="Mục đích khai thác" [width]="'300px'">
+                <d-cell>
+                  <ng-template let-cellItem="cellItem">
+                    {{ cellItem }}
+                  </ng-template>
+                </d-cell>
+              </d-column>
+              <d-column field="mining_note" header="Ghi chú" [width]="'200px'">
+                <d-cell>
+                  <ng-template let-cellItem="cellItem">
+                    {{ cellItem }}
+                  </ng-template>
+                </d-cell>
+              </d-column>
+              <d-column field="number_of_profile" header="Số hồ sơ" [width]="'100px'">
+                <d-cell>
+                  <ng-template let-cellItem="cellItem">
+                    {{ cellItem }}
+                  </ng-template>
+                </d-cell>
+              </d-column>
+              <d-column field="number_of_document" header="Số văn bản" [width]="'100px'">
+                <d-cell>
+                  <ng-template let-cellItem="cellItem">
+                    {{ cellItem }}
+                  </ng-template>
+                </d-cell>
+              </d-column>
+              <d-column field="status" header="Trạng thái" [width]="'150px'">
+                <d-cell>
+                  <ng-template let-cellItem="cellItem">
+                    {{ cellItem }}
+                  </ng-template>
+                </d-cell>
+              </d-column>
+            </d-data-table>
+          </div>
+          <div class="da-list-footer">
+            <d-pagination
+              [size]="'sm'"
+              [total]="pager.total"
+              [(pageSize)]="pager.pageSize"
+              [(pageIndex)]="pager.pageIndex"
+              [canViewTotal]="true"
+              [canChangePageSize]="true"
+              [canJumpPage]="true"
+              [maxItems]="5"
+              (pageIndexChange)="onPageChange($event)"
+              (pageSizeChange)="onSizeChange($event)"
+            >
+            </d-pagination>
+          </div>
+        </div>
+      </da-col-item>
+    </da-layout-row>
+  </div>
+</div>
