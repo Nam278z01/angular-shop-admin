@@ -6,7 +6,10 @@ import {
   InputNumberModule,
   PaginationModule,
   TooltipModule,
+  ToastModule
 } from 'ng-devui';
+import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
+import { NgxDropzoneModule } from 'ngx-dropzone';
 
 import { ManagementComponent } from './management.component';
 import { ManagementRoutingModule } from './management-routing.module';
@@ -28,6 +31,9 @@ import { OrderComponent } from './order/order.component';
     InputNumberModule,
     DatepickerModule,
     TooltipModule,
+    ToastModule,
+    CKEditorModule,
+    NgxDropzoneModule,
     ManagementRoutingModule
   ],
 })

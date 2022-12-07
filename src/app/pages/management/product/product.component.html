@@ -24,7 +24,7 @@
                   [filterKey]="'category_name'"
                   (valueChange)="subcategoryChosen = []; getList()"
                   [placeholder]="'Danh mục lớn'"
-                  >
+                >
                 </d-select>
               </div>
               <div class="da-header-item" *ngIf="categoryChosen">
@@ -37,7 +37,7 @@
                   [filterKey]="'subcategory_name'"
                   (valueChange)="getList()"
                   [placeholder]="'Danh mục nhỏ'"
-                  >
+                >
                 </d-select>
               </div>
               <div class="da-header-item">
@@ -58,36 +58,44 @@
                   [(ngModel)]="sortChosen"
                   (valueChange)="getList()"
                   [placeholder]="'Sắp xếp'"
-                  >
+                >
                 </d-select>
               </div>
               <div class="da-header-item">
                 <div class="da-header-item-label">Giá sản phẩm:</div>
-                <section style="display: flex;">
-                  <div class="col-md-6" style="margin-right: 10px">
+                <section style="display: flex">
+                  <div class="col-6" style="margin-right: 10px">
                     <div class="row">
-                      <div class="col-md-6">
-                        <d-search
+                      <div class="col-6">
+                        <d-input-number
                           [size]="'sm'"
-                          (searchFn)="getList()"
+                          (ngModelChange)="getList()"
                           [(ngModel)]="_search.min_price"
                           class="da-inline"
-                          [placeholder]="'Giá từ'"
-                        ></d-search>
+                          [min]="0"
+                          [step]="10000"
+                          [placeholder]="'Từ giá'"
+                          [allowEmpty]="true"
+                        >
+                        </d-input-number>
                       </div>
                     </div>
                   </div>
 
-                  <div class="col-md-6">
+                  <div class="col-6">
                     <div class="row">
-                      <div class="col-md-6">
-                        <d-search
+                      <div class="col-6">
+                        <d-input-number
                           [size]="'sm'"
-                          (searchFn)="getList()"
+                          (ngModelChange)="getList()"
                           [(ngModel)]="_search.max_price"
                           class="da-inline"
+                          [min]="0"
+                          [step]="10000"
                           [placeholder]="'Đến giá'"
-                        ></d-search>
+                          [allowEmpty]="true"
+                        >
+                        </d-input-number>
                       </div>
                     </div>
                   </div>
@@ -97,7 +105,7 @@
             <div class="header-right">
               <d-button (click)="addRow()" style="margin-right: 8px">Thêm sản phẩm</d-button>
               <d-button (click)="reset()" bsStyle="common" style="margin-right: 8px">Reset</d-button>
-              <d-button (click)="batchDelete()" bsStyle="danger" [disabled]="!deleteList.length">Xóa hàng loạt</d-button>
+              <d-button (click)="batchDelete(deleteList)" bsStyle="danger" [disabled]="!deleteList.length">Xóa hàng loạt</d-button>
             </div>
           </div>
           <br />
@@ -140,30 +148,41 @@
                     </td>
                     <td dTableCell>{{ rowIndex + 1 }}</td>
                     <td dTableCell>
-                      <img style="width: 60px; height: 100%; border-radius: 2px" src="{{ image_api }}image/product/{{rowItem.colors[0].product_image1 }}" alt="">
+                      <img
+                        style="width: 60px; height: 100%; border-radius: 2px"
+                        src="{{ image_api }}image/product/{{ rowItem.colors[0].product_image1 }}"
+                        alt=""
+                      />
                     </td>
                     <td dTableCell>
                       {{ rowItem.product_name }}
                     </td>
                     <td dTableCell>
-                      {{ rowItem.colors.length }} Màu
-                        (<span
-                          *ngFor="let cl of rowItem.colors; index as i"
-                          >
-                          {{ cl.color_name + (i == rowItem.colors.length - 1 ? '' : ',')}}
-                          </span>), {{ rowItem.colors[0].sizes.length }} Size
+                      {{ rowItem.colors.length }} Màu (<span *ngFor="let cl of rowItem.colors; index as i">
+                        {{ cl.color_name + (i == rowItem.colors.length - 1 ? '' : ',') }} </span
+                      >), {{ rowItem.colors[0].sizes.length }} Size
                     </td>
                     <td dTableCell>
-                      <span *ngIf="rowItem.min_price !== rowItem.max_price">{{ rowItem.min_price | number }}đ - {{ rowItem.max_price | number }}đ</span>
+                      <span *ngIf="rowItem.min_price !== rowItem.max_price"
+                        >{{ rowItem.min_price | number }}đ - {{ rowItem.max_price | number }}đ</span
+                      >
                       <span *ngIf="rowItem.min_price === rowItem.max_price">{{ rowItem.min_price | number }}đ</span>
                     </td>
                     <td dTableCell>
-                    {{ rowItem.quantity_sold }}
+                      {{ rowItem.quantity_sold }}
                     </td>
                     <td dTableCell>
                       <div class="btn-group over-flow-ellipsis">
-                        <d-button icon="icon-edit" bsStyle="danger" bsSize="xs" title="edit" shape="circle" style="margin-right: 8px"></d-button>
-                        <d-button icon="icon-delete" bsStyle="danger" bsSize="xs" title="delete" shape="circle"></d-button>
+                        <d-button
+                          icon="icon-edit"
+                          bsStyle="danger"
+                          bsSize="xs"
+                          title="edit"
+                          shape="circle"
+                          style="margin-right: 8px"
+                          (btnClick)="editRow(rowIndex, rowItem.product_id)"
+                        ></d-button>
+                        <d-button (btnClick)="batchDelete([rowItem])" icon="icon-delete" bsStyle="danger" bsSize="xs" title="delete" shape="circle"></d-button>
                       </div>
                     </td>
                   </tr>
@@ -193,6 +212,321 @@
 </div>
 
 <ng-template #EditorTemplate>
-  <da-admin-form>
-  </da-admin-form>
+  <form dForm #eForm dLoading [loading]="doneSetup" (dSubmit)="onSubmitted($event)" [dValidateRules]="{ message: 'The form verification failed, please check.' }">
+    <p style="font-weight: bold; margin-bottom: 30px">Thông tin sản phẩm</p>
+    <d-form-item>
+      <d-form-label [required]="true">Danh mục lớn:</d-form-label>
+      <d-form-control>
+        <d-select
+          [options]="categoryForEditOptions"
+          [(ngModel)]="product.category"
+          [name]="'category_id'"
+          [filterKey]="'category_name'"
+          [placeholder]="'Danh mục lớn'"
+          [dValidateRules]="[{ required: true, message: 'Không được để trống' }]"
+        >
+        </d-select>
+      </d-form-control>
+    </d-form-item>
+    <d-form-item>
+      <d-form-label [required]="true">Danh mục nhỏ:</d-form-label>
+      <d-form-control>
+        <d-select
+          [options]="product.category?.subcategories"
+          [(ngModel)]="product.subcategory"
+          [name]="'subcategory_id'"
+          [filterKey]="'subcategory_name'"
+          [placeholder]="'Danh mục nhỏ'"
+          [disabled]="!product.category"
+          [dValidateRules]="[{ required: true, message: 'Không được để trống' }]"
+        >
+        </d-select>
+      </d-form-control>
+    </d-form-item>
+    <d-form-item>
+      <d-form-label [required]="true">Tên sản phẩm:</d-form-label>
+      <d-form-control>
+        <input
+          dTextInput
+          [name]="'product_name'"
+          [placeholder]="'Tên sản phẩm'"
+          [(ngModel)]="product.product_name"
+          autocomplete="off"
+          maxlength="500"
+          [dValidateRules]="[{ required: true, message: 'Không được để trống' }]"
+        />
+      </d-form-control>
+    </d-form-item>
+    <d-form-item>
+      <d-form-label [required]="true">Giảm giá:</d-form-label>
+      <d-form-control>
+        <d-input-number
+          [name]="'product_discount'"
+          [placeholder]="'Giảm giá'"
+          [(ngModel)]="product.product_discount"
+          [max]="100"
+          [min]="0"
+          [dValidateRules]="[{ required: true, message: 'Không được để trống' }]"
+        >
+        </d-input-number>
+      </d-form-control>
+    </d-form-item>
+    <d-form-item>
+      <d-form-label>Mô tả:</d-form-label>
+      <d-form-control style="width: 74%" >
+        <ckeditor [editor]="Editor" [name]="'product_description'" [(ngModel)]="product.product_description"> </ckeditor>
+      </d-form-control>
+    </d-form-item>
+    <p style="font-weight: bold; margin: 30px 0">Thông tin bán hàng</p>
+    <div style="margin-bottom: 30px">
+      <d-row style="margin-bottom: 30px">
+        <d-col [dSpan]="4">Phân loại nhóm màu sắc:</d-col>
+        <d-col [dSpan]="20">
+          <d-row>
+            <d-col [dSpan]="24" *ngFor="let cl of product.colors; index as i">
+              <d-row>
+                <d-col [dSpan]="18">
+                  <d-form-item>
+                    <d-form-control style="margin-left: 0">
+                      <input
+                        dTextInput
+                        name="color{{ i }}"
+                        [placeholder]="'Tên màu sắc'"
+                        [(ngModel)]="cl.color_name"
+                        autocomplete="off"
+                        maxlength="100"
+                        [dValidateRules]="[{ required: true, message: 'Không được để trống' }]"
+                      />
+                    </d-form-control>
+                  </d-form-item>
+                </d-col>
+                <d-col [dSpan]="3" style="margin-left: 8px">
+                  <d-button
+                    icon="icon-delete"
+                    bsStyle="danger"
+                    bsSize="xs"
+                    title="delete"
+                    shape="circle"
+                    *ngIf="product.colors.length > 1"
+                    (btnClick)="removeColor(i)"
+                  >
+                  </d-button>
+                </d-col>
+              </d-row>
+            </d-col>
+
+            <d-col [dSpan]="8">
+              <d-button icon="icon-add" bsStyle="primary" bsSize="xs" title="add" (btnClick)="addColor()">Thêm phân loại màu sắc</d-button>
+            </d-col>
+          </d-row>
+        </d-col>
+      </d-row>
+      <d-row *ngFor="let cl of product.colors" style="margin-bottom: 30px">
+        <d-col [dSpan]="6">Ảnh sản phẩm màu {{ cl.color_name }}:</d-col>
+        <d-col [dSpan]="16">
+          <div class="product-color">
+            <div class="product-color-element">
+              <div>
+                <ngx-dropzone-image-preview class="product-color-img" ngProjectAs="ngx-dropzone-preview" *ngIf="cl.files[0]" [file]="cl.files[0]">
+                </ngx-dropzone-image-preview>
+                <img
+                  class="product-color-img"
+                  *ngIf="cl.product_image1 && !insert"
+                  src="{{ image_api }}image/product/{{ cl.product_image1 }}"
+                />
+                <div (click)="removeFile(cl, 0)" class="product-color-remove" *ngIf="cl.files[0] || cl.product_image1">
+                  <d-button icon="icon-delete" bsStyle="danger" bsSize="xs" title="delete" shape="circle"></d-button>
+                </div>
+                <ngx-dropzone accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"class="product-color-file" *ngIf="!cl.files[0] && !cl.product_image1" (change)="selectedFiles($event, cl, 0)">
+                    <d-button icon="icon-add" bsStyle="primary" bsSize="xs" title="add" shape="circle"></d-button>
+                </ngx-dropzone>
+              </div>
+            </div>
+            <div class="product-color-element">
+              <div>
+                <ngx-dropzone-image-preview class="product-color-img" ngProjectAs="ngx-dropzone-preview" *ngIf="cl.files[1]" [file]="cl.files[1]">
+                </ngx-dropzone-image-preview>
+                <img
+                  class="product-color-img"
+                  *ngIf="cl.product_image2 && !insert"
+                  src="{{ image_api }}image/product/{{ cl.product_image2 }}"
+                />
+                <div (click)="removeFile(cl, 1)" class="product-color-remove" *ngIf="cl.files[0] || cl.product_image2">
+                  <d-button icon="icon-delete" bsStyle="danger" bsSize="xs" title="delete" shape="circle"></d-button>
+                </div>
+                <ngx-dropzone accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"class="product-color-file" *ngIf="!cl.files[1] && !cl.product_image2" (change)="selectedFiles($event, cl, 1)">
+                    <d-button icon="icon-add" bsStyle="primary" bsSize="xs" title="add" shape="circle"></d-button>
+                </ngx-dropzone>
+              </div>
+            </div>
+            <div class="product-color-element">
+              <div>
+                <ngx-dropzone-image-preview class="product-color-img" ngProjectAs="ngx-dropzone-preview" *ngIf="cl.files[2]" [file]="cl.files[2]">
+                </ngx-dropzone-image-preview>
+                <img
+                  class="product-color-img"
+                  *ngIf="cl.product_image3 && !insert"
+                  src="{{ image_api }}image/product/{{ cl.product_image3 }}"
+                />
+                <div (click)="removeFile(cl, 2)" class="product-color-remove" *ngIf="cl.files[0] || cl.product_image3">
+                  <d-button icon="icon-delete" bsStyle="danger" bsSize="xs" title="delete" shape="circle"></d-button>
+                </div>
+                <ngx-dropzone accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"class="product-color-file" *ngIf="!cl.files[2] && !cl.product_image3" (change)="selectedFiles($event, cl, 2)">
+                    <d-button icon="icon-add" bsStyle="primary" bsSize="xs" title="add" shape="circle"></d-button>
+                </ngx-dropzone>
+              </div>
+            </div>
+            <div class="product-color-element">
+              <div>
+                <ngx-dropzone-image-preview class="product-color-img" ngProjectAs="ngx-dropzone-preview" *ngIf="cl.files[3]" [file]="cl.files[3]">
+                </ngx-dropzone-image-preview>
+                <img
+                  class="product-color-img"
+                  *ngIf="cl.product_image4 && !insert"
+                  src="{{ image_api }}image/product/{{ cl.product_image4 }}"
+                />
+                <div (click)="removeFile(cl, 3)" class="product-color-remove" *ngIf="cl.files[0] || cl.product_image4">
+                  <d-button icon="icon-delete" bsStyle="danger" bsSize="xs" title="delete" shape="circle"></d-button>
+                </div>
+                <ngx-dropzone accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"class="product-color-file" *ngIf="!cl.files[3] && !cl.product_image4" (change)="selectedFiles($event, cl, 3)">
+                    <d-button icon="icon-add" bsStyle="primary" bsSize="xs" title="add" shape="circle"></d-button>
+                </ngx-dropzone>
+              </div>
+            </div>
+            <div class="product-color-element">
+              <div>
+                <ngx-dropzone-image-preview class="product-color-img" ngProjectAs="ngx-dropzone-preview" *ngIf="cl.files[4]" [file]="cl.files[4]">
+                </ngx-dropzone-image-preview>
+                <img
+                  class="product-color-img"
+                  *ngIf="cl.product_image5 && !insert"
+                  src="{{ image_api }}image/product/{{ cl.product_image5 }}"
+                />
+                <div (click)="removeFile(cl, 4)" class="product-color-remove" *ngIf="cl.files[0] || cl.product_image5">
+                  <d-button icon="icon-delete" bsStyle="danger" bsSize="xs" title="delete" shape="circle"></d-button>
+                </div>
+                <ngx-dropzone accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"class="product-color-file" *ngIf="!cl.files[4] && !cl.product_image5" (change)="selectedFiles($event, cl, 4)">
+                    <d-button icon="icon-add" bsStyle="primary" bsSize="xs" title="add" shape="circle"></d-button>
+                </ngx-dropzone>
+              </div>
+            </div>
+          </div>
+        </d-col>
+      </d-row>
+      <d-row style="margin-bottom: 30px">
+        <d-col [dSpan]="4">Phân loại nhóm size:</d-col>
+        <d-col [dSpan]="20">
+          <d-row>
+            <d-col [dSpan]="24" *ngFor="let s of product.sizes; index as i">
+              <d-row>
+                <d-col [dSpan]="18">
+                  <d-form-item>
+                    <d-form-control style="margin-left: 0">
+                      <input
+                        dTextInput
+                        name="size{{ i }}"
+                        [placeholder]="'Tên size'"
+                        [(ngModel)]="s.size_name"
+                        autocomplete="off"
+                        maxlength="100"
+                        (ngModelChange)="changeSizeName(i, s)"
+                        [dValidateRules]="[{ required: true, message: 'Không được để trống' }]"
+                      />
+                    </d-form-control>
+                  </d-form-item>
+                </d-col>
+                <d-col [dSpan]="3" style="margin-left: 8px">
+                  <d-button
+                    icon="icon-delete"
+                    bsStyle="danger"
+                    bsSize="xs"
+                    title="delete"
+                    shape="circle"
+                    *ngIf="product.sizes.length > 1"
+                    (btnClick)="removeSize(i)"
+                  ></d-button>
+                </d-col>
+              </d-row>
+            </d-col>
+
+            <d-col [dSpan]="8">
+              <d-button icon="icon-add" bsStyle="primary" bsSize="xs" title="add" (btnClick)="addSize()">Thêm phân loại size</d-button>
+            </d-col>
+          </d-row>
+        </d-col>
+      </d-row>
+      <d-row style="margin-bottom: 30px">
+        <d-col [dSpan]="4">Danh sách phân loại hàng:</d-col>
+        <d-col [dSpan]="20">
+          <div class="product-classify">
+            <div style="width: 50%">
+              <div class="product-classify-header">
+                <div class="product-classify-cell">
+                  <div class="product-classify-content">Màu</div>
+                </div>
+                <div class="product-classify-cell">
+                  <div class="product-classify-content">Size</div>
+                </div>
+              </div>
+              <div class="product-classify-body">
+                <div *ngFor="let cl of product.colors" class="product-classify-wrap">
+                  <div class="product-classify-body-cell">
+                    {{ cl.color_name }}
+                  </div>
+                  <div class="product-classify-body-cell-group">
+                    <div *ngFor="let s of cl.sizes">
+                      {{ s.size_name }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 50%">
+              <div class="product-classify-header">
+                <div class="product-classify-cell">
+                  <div class="product-classify-content">Kho hàng</div>
+                </div>
+                <div class="product-classify-cell">
+                  <div class="product-classify-content">Giá (VNĐ)</div>
+                </div>
+              </div>
+              <div class="product-classify-body">
+                <div *ngFor="let cl of product.colors; index as i" class="product-classify-wrap">
+                  <div class="product-classify-body-cell-group">
+                    <div *ngFor="let s of cl.sizes; index as j">
+                      <d-input-number
+                        name="{{ i }}quantity{{ j }}"
+                        [placeholder]="'Số lượng'"
+                        [(ngModel)]="s.quantity"
+                        [min]="0"
+                        style="width: 100%"
+                      >
+                      </d-input-number>
+                    </div>
+                  </div>
+                  <div class="product-classify-body-cell">
+                    <d-input-number
+                      name="product_price{{ i }}"
+                      [placeholder]="'Giá sản phẩm'"
+                      [(ngModel)]="cl.product_price"
+                      [min]="0"
+                      [step]="10000"
+                      style="width: 100%"
+                    >
+                    </d-input-number>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </d-col>
+      </d-row>
+    </div>
+    <d-form-operation class="da-form-operation" style="text-align: right">
+      <d-button style="margin-right: 8px" dFormSubmit [dFormSubmitData]="'submit-button'" [showLoading]="isSubmitting">Ok</d-button>
+      <d-button bsStyle="common" (click)="onCanceled()">Hủy</d-button>
+    </d-form-operation>
+  </form>
 </ng-template>
+
+

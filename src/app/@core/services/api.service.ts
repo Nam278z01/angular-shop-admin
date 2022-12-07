@@ -35,6 +35,25 @@ export class ApiService {
     return this._http.get<T>(this.host + url, options );
   }
 
+  upload(url: string, files: File[], withToken: boolean = true) {
+    let header: any = {}
+    header['Content-Disposition'] = 'multipart/form-data';
+    header['Accept'] = 'application/json';
+    if (withToken) {
+      header['Authorization'] = `${this.admin?.token_type} ${this.admin?.access_token}`;
+    }
+
+    let formData: FormData = new FormData();
+    files.forEach((file) => { formData.append('files[]', file); });
+
+    let options: any = {
+      headers: new HttpHeaders(header),
+    }
+
+    return this._http
+      .post<any>(this.host + url, formData, options)
+  }
+
   post(url: string, body: any, params: any = {}, withToken: boolean = true) {
     let header: any = {}
     header['Content-Type'] = 'application/json';
