@@ -347,6 +347,9 @@ export class ProductComponent implements OnInit {
   onSubmitted({ valid, directive, data, errors }: any) {
     console.log('Valid:', valid, 'Directive:', directive, 'data', data, 'errors', errors);
     if (!valid) {
+      this.toastService.open({
+        value: [{ severity: 'warn', summary: 'Chú ý', content: `Chưa điền đủ thông tin được yêu cầu!` }],
+      });
       return false;
     }
     if (this.isSubmitting) {
@@ -536,13 +539,6 @@ export class ProductComponent implements OnInit {
     this.editForm!.modalInstance.hide();
     this.editRowIndex = -1;
   }
-
-  validateNumber(e: any) {
-    const pattern = /^[0-9]$/;
-    if (!pattern.test(e.key)) {
-      e.preventDefault();
-    }
-  };
 
   onPageChange(e: number) {
     this.pager.pageIndex = e;
