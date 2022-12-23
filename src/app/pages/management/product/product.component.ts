@@ -487,7 +487,7 @@ export class ProductComponent implements OnInit {
                   results.modalInstance.hide();
                   this.reset();
                   this.toastService.open({
-                    value: [{ severity: 'success', summary: 'Thành công', content: `Xóa phẩm thành công!` }],
+                    value: [{ severity: 'success', summary: 'Thành công', content: `Xóa sản phẩm thành công!` }],
                   });
                   this.isSubmitting = false;
                 });

@@ -7,9 +7,7 @@
       <d-breadcrumb-item>Quản lý</d-breadcrumb-item>
       <d-breadcrumb-item>Đơn hàng</d-breadcrumb-item>
     </d-breadcrumb>
-    <div class="da-content-banner-title">
-      Quản lý
-    </div>
+    <div class="da-content-banner-title">Quản lý</div>
     <div>Đơn hàng</div>
   </div>
   <div class="da-content-wrapper">
@@ -19,98 +17,115 @@
           <div class="da-list-header">
             <div class="da-header-left">
               <div class="da-header-item">
-                <div class="da-header-item-label">Border Type：</div>
-                <d-select [placeholder]="'change table style'" [options]="options" [(ngModel)]="searchForm.borderType"></d-select>
+                <div class="da-header-item-label">Mã đơn hàng:</div>
+                <d-search [placeholder]="'Mã đơn hàng'" [(ngModel)]="_search.order_id" (searchFn)="getList()"></d-search>
               </div>
               <div class="da-header-item">
-                <div class="da-header-item-label">Size：</div>
-                <d-select [placeholder]="'change table size'" [options]="sizeOptions" [(ngModel)]="searchForm.size"></d-select>
-              </div>
-              <div class="da-header-item">
-                <div class="da-header-item-label">Layout：</div>
-                <d-select [placeholder]="'change table layout'" [options]="layoutOptions" [(ngModel)]="searchForm.layout"></d-select>
+                <div class="da-header-item-label">Tên khách hàng:</div>
+                <d-search [placeholder]="'Tên khách hàng'" [(ngModel)]="_search.customer_name" (searchFn)="getList()"></d-search>
               </div>
             </div>
             <div class="header-right">
-              <d-button (click)="reset()">Reset</d-button>
+              <d-button (click)="reset()" bsStyle="common" style="margin-right: 8px">Reset</d-button>
+              <d-button (click)="batchDelete(deleteList)" bsStyle="danger" [disabled]="!deleteList.length">Xóa hàng loạt</d-button>
             </div>
           </div>
+          <br />
           <div class="list-content" dLoading [loading]="busy">
             <d-data-table
               #datatable
-              [dataSource]="basicDataSource"
+              [dataSource]="basicDataSourcePag"
               [borderType]="searchForm.borderType"
               [size]="searchForm.size"
               [tableLayout]="searchForm.layout"
               [scrollable]="true"
+              (checkAllChange)="onCheckAllChange()"
             >
-              <d-column field="id" header="Id" [width]="'100px'">
-                <d-cell>
-                  <ng-template let-cellItem="cellItem">
-                    {{ cellItem }}
-                  </ng-template>
-                </d-cell>
-              </d-column>
-              <d-column field="title" header="Title" [width]="'300px'">
-                <d-cell>
-                  <ng-template let-cellItem="cellItem">
-                    <span [title]="cellItem" class="over-flow-ellipsis" [style.width]="'300px'">
-                      <d-tag [tag]="'Epic'" [labelStyle]="'epic'"></d-tag>
-                      {{ cellItem }}
-                    </span>
-                  </ng-template>
-                </d-cell>
-              </d-column>
-              <d-column field="priority" header="Priority" [width]="'100px'">
-                <d-cell>
-                  <ng-template let-cellItem="cellItem">
-                    <d-tag [tag]="cellItem" [labelStyle]="cellItem"></d-tag>
-                  </ng-template>
-                </d-cell>
-              </d-column>
-              <d-column field="iteration" header="Iteration" [width]="'100px'">
-                <d-cell>
-                  <ng-template let-cellItem="cellItem">
-                    {{ cellItem }}
-                  </ng-template>
-                </d-cell>
-              </d-column>
-              <d-column field="assignee" header="Assignee" [width]="'100px'">
-                <d-cell>
-                  <ng-template let-cellItem="cellItem">
-                    <div class="over-flow-ellipsis">
-                      <d-avatar [name]="cellItem" [width]="24" [height]="24"></d-avatar>
-                      <span style="margin-left: 6px">{{ cellItem }}</span>
-                    </div>
-                  </ng-template>
-                </d-cell>
-              </d-column>
-              <d-column field="status" header="Status" [width]="'100px'">
-                <d-cell>
-                  <ng-template let-cellItem="cellItem">
-                    <span [ngClass]="cellItem.split(' ')[0]">{{ cellItem || '--' }}</span>
-                  </ng-template>
-                </d-cell>
-              </d-column>
-              <d-column field="timeline" header="Timeline" [width]="'100px'">
-                <d-cell>
-                  <ng-template let-cellItem="cellItem">
-                    <div class="over-flow-ellipsis">
-                      {{ cellItem }}
-                    </div>
-                  </ng-template>
-                </d-cell>
-              </d-column>
-              <d-column field="Actions" header="Actions" [width]="'100px'">
-                <d-cell>
-                  <ng-template let-rowItem="rowItem" let-rowIndex="rowIndex">
-                    <div class="btn-group over-flow-ellipsis">
-                      <d-button icon="icon-edit" bsStyle="text-dark" title="edit" (click)="editRow(rowItem, rowIndex)"></d-button>
-                      <d-button icon="icon-delete" bsStyle="text-dark" title="delete" (click)="deleteRow(rowIndex)"></d-button>
-                    </div>
-                  </ng-template>
-                </d-cell>
-              </d-column>
+              <thead dTableHead [checkable]="true">
+                <tr dTableRow>
+                  <th dHeadCell>#</th>
+                  <th dHeadCell>Mã đơn hàng</th>
+                  <th dHeadCell>Tên khách hàng</th>
+                  <th dHeadCell>Địa chỉ khách hàng</th>
+                  <th dHeadCell>Số điện thoại</th>
+                  <th dHeadCell>Thời gian đặt hàng</th>
+                  <th dHeadCell>Tổng số tiền</th>
+                  <th dHeadCell>Trạng thái đơn hàng</th>
+                  <th dHeadCell>Tác vụ</th>
+                </tr>
+              </thead>
+              <tbody dTableBody>
+                <ng-template let-rowItem="rowItem" let-rowIndex="rowIndex" let-nestedIndex="nestedIndex">
+                  <tr dTableRow [ngClass]="{ 'table-row-selected': rowItem.$checked }">
+                    <td dTableCell class="devui-checkable-cell">
+                      <d-checkbox
+                        (ngModelChange)="onRowCheckChange($event, rowIndex, nestedIndex, rowItem)"
+                        [ngModel]="rowItem.$checked"
+                        [halfchecked]="rowItem.$halfChecked"
+                        [disabled]="rowItem.$checkDisabled"
+                        dTooltip
+                        [content]="rowItem.$checkBoxTips"
+                        [position]="['top', 'right', 'bottom', 'left']"
+                        [showAnimation]="false"
+                      >
+                      </d-checkbox>
+                    </td>
+                    <td dTableCell>{{ rowIndex + 1 }}</td>
+                    <td dTableCell>
+                      {{ rowItem.order_id }}
+                    </td>
+                    <td dTableCell>
+                      {{ rowItem.customer_name }}
+                    </td>
+                    <td dTableCell>
+                      {{ rowItem.customer_address }}
+                    </td>
+                    <td dTableCell>
+                      {{ rowItem.customer_phone }}
+                    </td>
+                    <td dTableCell>
+                      {{ rowItem.order_date | date : 'HH:mm dd-MM-yyyy' }}
+                    </td>
+                    <td dTableCell>
+                      {{ rowItem.total | number }}
+                    </td>
+                    <td dTableCell>
+                      <span
+                        class="font-bold text-[12px] text-white px-[7px] py-[3px] rounded-[2px]"
+                        [ngClass]="{
+                          'bg-[#777]': rowItem.order_state_current == '0',
+                          'bg-[#00a65a]': rowItem.order_state_current == '1',
+                          'bg-[#3c8dbc]': rowItem.order_state_current == '2',
+                          'bg-[#dd4b39]': rowItem.order_state_current == '3',
+                          'bg-[#f39c12]': rowItem.order_state_current == '4'
+                        }"
+                        >{{ rowItem.order_state_current | orderState }}
+                      </span>
+                    </td>
+                    <td dTableCell>
+                      <div class="btn-group over-flow-ellipsis">
+                        <d-button
+                          icon="icon-edit"
+                          bsStyle="danger"
+                          bsSize="xs"
+                          title="edit"
+                          shape="circle"
+                          style="margin-right: 8px"
+                          (btnClick)="editRow(rowIndex, rowItem.order_id)"
+                        ></d-button>
+                        <d-button
+                          (btnClick)="batchDelete([rowItem])"
+                          icon="icon-delete"
+                          bsStyle="danger"
+                          bsSize="xs"
+                          title="delete"
+                          shape="circle"
+                        ></d-button>
+                      </div>
+                    </td>
+                  </tr>
+                </ng-template>
+              </tbody>
             </d-data-table>
           </div>
           <div class="da-list-footer">
@@ -135,6 +150,170 @@
 </div>
 
 <ng-template #EditorTemplate>
-  <da-admin-form [formConfig]="formConfig" [formData]="formData" (submitted)="onSubmitted($event)" (canceled)="onCanceled()">
-  </da-admin-form>
+  <div class="flex-shrink-0 flex-grow" dLoading [showLoading]="!doneSetup">
+    <div class="mt-[12px]" *ngIf="doneSetup">
+      <div class="pt-[24px] px-[24px] pb-[12px] bg-white">
+        <div class="text-[15px] pb-[12px] flex justify-between">
+          <span class="text-black font-bold text-[12px] italic">ID ĐƠN HÀNG: {{ order.order_id }}</span>
+          <span
+            class="font-bold text-[12px] text-white px-[7px] py-[3px] rounded-[2px]"
+            [ngClass]="{
+              'bg-[#777]': order.order_state_current == '0',
+              'bg-[#00a65a]': order.order_state_current == '1',
+              'bg-[#3c8dbc]': order.order_state_current == '2',
+              'bg-[#dd4b39]': order.order_state_current == '3',
+              'bg-[#f39c12]': order.order_state_current == '4'
+            }"
+            >{{ order.order_state_current | orderState }}</span
+          >
+        </div>
+        <div style="display: flex; margin: 30px 0; justify-content: center; align-items: center">
+          <d-select
+            style="margin-right: 8px"
+            [options]="order_states"
+            [filterKey]="'label'"
+            [(ngModel)]="order_state_picked"
+            [placeholder]="'Trạng thái đơn hàng'"
+            [optionDisabledKey]="'disabled'"
+            (ngModelChange)="updateOrderState()"
+          >
+          </d-select>
+          <d-button>Cập nhập</d-button>
+        </div>
+        <div class="relative py-[30px] border-t border-[#eaeaea] rounded-br rounded-bl flex justify-between">
+          <div *ngIf="order.orderstates.length > 1" class="absolute top-[58px] h-1 w-full">
+            <div class="absolute h-full w-[calc(100%-140px)] mx-[70px] bg-white"></div>
+            <div class="absolute h-full w-[calc(100%-140px)] mx-[70px] bg-[#2dc258]"></div>
+          </div>
+          <div
+            *ngFor="let os of order.orderstates"
+            [ngClass]="{ 'm-auto': order.orderstates.length == 1 }"
+            class="relative w-[140px] text-center"
+          >
+            <div
+              class="bg-white m-auto w-[60px] h-[60px] flex justify-center items-center rounded-full border-[4px] border-[#2dc258] text-[#2dc258]"
+            >
+              <i
+                [ngClass]="{
+                  'bx-food-menu': os.orderstate_name == 0,
+                  'bx-car': os.orderstate_name == 1,
+                  'bx-download': os.orderstate_name == 2,
+                  'bx-error-alt': os.orderstate_name == 3,
+                  'bx-undo': os.orderstate_name == 4
+                }"
+                class="bx text-[24px] font-bold"
+              ></i>
+            </div>
+            <div class="text-[rgba(0,0,0,.8)] text-[13px] mt-[20px] mb-1">{{ os.orderstate_name | orderState }}</div>
+            <div class="text-[rgba(0,0,0,.26)] text-[12px]">{{ os.orderstate_date | date : 'HH:mm dd-MM-yyyy' }}</div>
+          </div>
+        </div>
+        <div class="py-[20px] border-t border-[#eaeaea] rounded-br rounded-bl">
+          <div class="pb-[12px] text-[14px] font-medium" style="font-weight: 600">Địa Chỉ Nhận Hàng</div>
+          <div class="flex">
+            <div class="pt-[10px] pr-[24px] flex-1">
+              <div class="text-[13px] font-medium mb-[8px] text-[rgba(0,0,0,.8)]">{{ order.customer_name }}</div>
+              <div class="text-[12px] leading-[22px] text-[rgba(0,0,0,.54)]">
+                <span>{{ order.customer_phone }}</span>
+                <p>{{ order.customer_address }}</p>
+              </div>
+            </div>
+            <div class="w-[500px] pt-[4px] pl-[24px] border-l border-[rgba(0,0,0,.09)]">
+              <div *ngFor="let os of order.orderstates.slice().reverse(); index as i" class="relative">
+                <div *ngIf="i != order.orderstates.length - 1" class="absolute w-[1px] h-full top-[12px] left-[5px] bg-[#d8d8d8]"></div>
+                <div class="relative flex items-center h-[32px] text-[rgba(0,0,0,.8)] text-[13px]">
+                  <div [ngClass]="{ 'bg-[#26aa99]': i == 0, 'bg-[#d8d8d8]': i != 0 }" class="w-[11px] h-[11px] mr-[8px] rounded-full"></div>
+                  <div class="mr-3">
+                    {{ os.orderstate_date | date : 'HH:mm dd-MM-yyyy' }}
+                  </div>
+                  <div [ngClass]="{ 'text-[#26aa99]': i == 0, 'text-[rgba(0,0,0,.54)]': i != 0 }">
+                    {{ os.orderstate_name | orderState }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="border-t border-[#eaeaea] rounded-br rounded-bl">
+          <div *ngFor="let od of order.orderdetails" class="flex pt-[12px] justify-between">
+            <div class="flex">
+              <div class="w-[90px] border border-[#e1e1e1] relative group">
+                <img
+                  class="w-full h-full"
+                  src="{{ image_api }}image/product/{{ od.size.color.product_image1 }}"
+                  alt="{{ od.size.color.product.product_name }}"
+                />
+                <img
+                  src="{{ image_api }}image/product/{{
+                    od.size.color.product_image2 ||
+                      od.size.color.product_image3 ||
+                      od.size.color.product_image4 ||
+                      od.size.color.product_image5
+                  }}"
+                  alt="{{ od.size.color.product.product_name }}"
+                  class="absolute top-0 left-0 w-full opacity-0 group-hover:opacity-100 transition-all duration-500"
+                />
+              </div>
+              <div class="pl-[12px]">
+                <div class="text-[13px] mb-[5px] hover:underline">
+                  {{ od.size.color.product.product_name }}
+                </div>
+                <div class="text-[#0000008a] text-[13px] mb-[5px]">
+                  Phân loại hàng: Màu {{ od.size.color.color_name }}, Size {{ od.size.size_name }}
+                </div>
+                <div class="text-[14px] mb-[5px]">x{{ od.product_quantity }}</div>
+              </div>
+            </div>
+            <div class="flex items-center" style="justify-content: end">
+              <!-- Normal -->
+              <span *ngIf="od.product_discount == 0" class="font-semibold text-[20px] text-black">
+                {{ od.price * od.product_quantity | number }}₫
+              </span>
+
+              <!-- Discount -->
+              <span *ngIf="od.product_discount != 0" class="text-[#fa6338] text-[18px] block font-semibold mr-2">
+                {{ (od.price - (od.price * od.product_discount) / 100) * od.product_quantity | number }}₫
+              </span>
+              <del *ngIf="od.product_discount != 0" class="text-[#999] text-[14px]"> {{ od.price * od.product_quantity | number }}₫ </del>
+              <div *ngIf="od.product_discount != 0" class="w-[50px] text-center text-[12px] leading-[20px] bg-[#222] text-white ml-3">
+                -{{ od.product_discount }}%
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-[12px] border-t border-[#eaeaea]">
+          <div class="border-b border-dotted border-[rgba(0,0,0,.09)] flex items-center justify-end w-full text-right">
+            <div class="flex-1 py-[13px] px-[10px] text-[12px] text-[rgba(0,0,0,.54)]">Tổng tiền hàng</div>
+            <div class="w-[240px] text-[rgba(0,0,0,.8)] py-[13px] text-[14px] border-l border-dotted border-[rgba(0,0,0,.09)]">
+              {{ order.total | number }}₫
+            </div>
+          </div>
+          <div class="border-b border-dotted border-[rgba(0,0,0,.09)] flex items-center justify-end w-full text-right">
+            <div class="flex-1 py-[13px] px-[10px] text-[12px] text-[rgba(0,0,0,.54)]">Phí vận chuyển</div>
+            <div class="w-[240px] text-[rgba(0,0,0,.8)] py-[13px] text-[14px] border-l border-dotted border-[rgba(0,0,0,.09)]">
+              Miễn phí
+            </div>
+          </div>
+          <div class="border-b border-dotted border-[rgba(0,0,0,.09)] flex items-center justify-end w-full text-right">
+            <div class="flex-1 py-[13px] px-[10px] text-[12px] text-[rgba(0,0,0,.54)]">Tổng số tiền</div>
+            <div class="w-[240px] text-[#fa6338] py-[13px] text-[24px] font-bold border-l border-dotted border-[rgba(0,0,0,.09)]">
+              {{ order.total | number }}₫
+            </div>
+          </div>
+          <div class="border-b border-dotted border-[rgba(0,0,0,.09)] flex items-center justify-end w-full text-right">
+            <div class="flex-1 py-[13px] px-[10px] text-[12px] text-[rgba(0,0,0,.54)]">Phương thức Thanh toán</div>
+            <div class="w-[240px] text-[rgba(0,0,0,.8)] py-[13px] text-[14px] border-l border-dotted border-[rgba(0,0,0,.09)]">
+              Thanh toán khi nhận hàng
+            </div>
+          </div>
+          <div class="border-b border-dotted border-[rgba(0,0,0,.09)] flex items-center justify-end w-full text-right">
+            <div class="flex-1 py-[13px] px-[10px] text-[12px] text-[rgba(0,0,0,.54)]">Thuế VAT</div>
+            <div class="w-[240px] text-[rgba(0,0,0,.8)] py-[13px] text-[14px] border-l border-dotted border-[rgba(0,0,0,.09)]">
+              Giá sản phẩm đã bao gồm VAT
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </ng-template>

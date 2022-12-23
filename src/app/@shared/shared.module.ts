@@ -44,6 +44,7 @@ import { DaGridModule } from './layouts/da-grid';
 import { SideMenuComponent } from './components/side-menu/side-menu.component';
 import { RegisterComponent } from './components/register/register.component';
 import { HeaderNoticeComponent } from './components/header/header-operation/header-notice/header-notice.component';
+import { OrderStatePipe } from './pipes/order-state.pipe';
 
 const DEVUI_MODULES = [
   LayoutModule,
@@ -69,6 +70,7 @@ const DEVUI_MODULES = [
   ModalModule,
 ];
 const COMPONENTS = [HeaderComponent, FooterComponent, NavbarComponent, PersonalizeComponent];
+const PIPES = [OrderStatePipe]
 @NgModule({
   declarations: [
     LoginComponent,
@@ -79,6 +81,7 @@ const COMPONENTS = [HeaderComponent, FooterComponent, NavbarComponent, Personali
     HeaderNoticeComponent,
     RegisterComponent,
     ...COMPONENTS,
+    ...PIPES
   ],
   imports: [
     CommonModule,
@@ -106,6 +109,7 @@ const COMPONENTS = [HeaderComponent, FooterComponent, NavbarComponent, Personali
     SideMenuComponent,
     ...DEVUI_MODULES,
     ...COMPONENTS,
+    ...PIPES
   ],
 })
 export class SharedModule {
