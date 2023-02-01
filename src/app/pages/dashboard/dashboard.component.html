@@ -1,0 +1,35 @@
+<div class="da-content-wrapper">
+
+  <da-layout-row [daGutter]="[24, 24]">
+    <da-col-item [daSpan]="24">
+      <div class="da-content-card da-analysis-line">
+        <div class="da-content-title" style="display: flex">
+          <span style="margin-right: 8px;">Biểu đồ thống kê doanh thu ngày theo tháng năm</span>
+          <div class="devui-input-group devui-dropdown-origin-wrapper devui-dropdown-origin">
+            <input
+              [mode]="'month'"
+              [dateFormat]="'y-MM'"
+              class="devui-input devui-form-control"
+              placeholder="year-month"
+              (click)="datePicker2.toggle()"
+              name="dp"
+              [(ngModel)]="date"
+              autocomplete="off"
+              dDatepicker
+              #datePicker2="datepicker"
+              (selectedDateChange)="forDayOfMonthChart($event)"
+            />
+            <div *ngIf="date" class="devui-input-group-addon close-icon-wrapper" (click)="datePicker2.clearAll()">
+              <i class="icon icon-close"></i>
+            </div>
+            <div class="devui-input-group-addon" (click)="datePicker2.toggle()">
+              <i class="icon icon-calendar"></i>
+            </div>
+          </div>
+        </div>
+        <d-echarts [options]="chartOption2" class="da-echarts-line"></d-echarts>
+      </div>
+    </da-col-item>
+  </da-layout-row>
+
+</div>

@@ -15,16 +15,6 @@ const routes: Routes = [
           import('./dashboard/dashboard.module').then((m) => m.DashboardModule),
       },
       {
-        path: 'form',
-        loadChildren: () =>
-          import('./form/form.module').then((m) => m.FormModule),
-      },
-      {
-        path: 'list',
-        loadChildren: () =>
-          import('./list/list.module').then((m) => m.ListModule),
-      },
-      {
         path: 'abnormal',
         loadChildren: () =>
           import('./abnormal/abnormal.module').then((m) => m.AbnormalModule),
